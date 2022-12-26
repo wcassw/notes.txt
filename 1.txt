@@ -1,0 +1,591 @@
+----------------------------------------------
+
+from flask.ext.script import Manager, Server
+from flask.ext.migrate import Migrate, MigrateCommand
+from OpenSSL import SSL
+import os
+
+from project import app, db
+
+app.config.from_object(os.environ['APP_SETTINGS'])
+migrate = Migrate(app, db)
+manager = Manager(app)
+
+manager.add_command('db', MigrateCommand)
+manager.add_command("runserver", Server(ssl_context=('./server.crt', './server.key')))
+
+if __name__ == '__main__':
+    manager.run()
+
+
+----------------------------------------------
+cat >  run.py:
+
+
+#!flask/bin/python
+from app import app
+import ssl
+ctx = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+ctx.load_cert_chain('sertnew/se-emulator.crt', 'sertnew/se-emulator.key')
+app.run(debug=True, host='127.0.0.1', port=5000, ssl_context=ctx)
+
+
+app.run(debug=True, host='127.0.0.1', port=5000, ssl_context=ctx)
+ to
+app.run(debug=True, host='0.0.0.0', port=5000, ssl_context=ctx)
+  or
+app.run(debug=True, host='0.0.0.0', port=443, ssl_context=ctx)
+
+
+-----
+
+cat >  Dockerfile:
+
+FROM python:3.5-slim
+RUN apt-get update && apt-get install -y python3-pip
+COPY . /storage-emulator
+WORKDIR /storage-emulator
+RUN pip3 install -r requirements.txt
+EXPOSE 5000
+ENTRYPOINT ["python"]
+CMD ["run.py"]
+
+
+ https://127.0.0.1:5000/ 
+
+
+ -----------------------------------------------
+
+
+ # above is self cert.
+#  use https://letsencrypt.org/ to be certi.
+
+
+----------------------------------------------
+
+Python authorize :
+
+@app.route('/authorize')
+def authorize():
+
+    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
+        CLIENT_SECRETS_FILE, scopes=SCOPES)
+
+    flow.redirect_uri = flask.url_for('oauth2callback', _external=True)
+
+    authorization_url, state = flow.authorization_url(
+        access_type='offline',
+        include_granted_scopes='true')  
+
+    flask.session['state'] = state
+    return flask.redirect(authorization_url)
+
+
+
+Python oauth2callback:
+
+@app.route('/oauth2callback')
+def oauth2callback():
+
+    state = flask.session['state']
+
+    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
+        CLIENT_SECRETS_FILE, scopes=SCOPES, state=state)
+    flow.redirect_uri = flask.url_for('oauth2callback', _external=True)
+
+    authorization_response = flask.request.url
+    flow.fetch_token(authorization_response=authorization_response)
+
+    credentials = flow.credentials
+
+    flask.session['credentials'] = credentials_to_dict(credentials)
+    session = flow.authorized_session()
+    flask.session['username_output'] = session.get(
+        'https://www.googleapis.com/userinfo/v2/me').json()
+
+    return flask.redirect(flask.url_for('map'))
+
+
+authorization_response = authorization_response.replace('http', 'https')
+
+
+--- 
+
+import re
+....
+authorization_response = request.url
+new_auth = re.sub(
+    "http:",
+    "https:",
+    authorization_response
+)
+flow.fetch_new_token(new_auth)
+
+
+---------------------------------------------------
+---------------------------------------------------
+
+cat > app6.py
+
+from flask import Flask, jsonify 
+
+app = Flask(__name__) 
+
+@app.route('/api') 
+def my_microservice(): 
+    return jsonify({'Hello': 'World!'}) 
+
+if __name__ == '__main__': 
+    app.run()
+
+
+
+-- http://127.0.0.1:5000/api
+
+
+
+
+
+---------------------------------------------------
+
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
+import time
+import urllib.request
+import urllib.error
+
+def uptime_bot(url):
+    while True:
+        try:
+            conn = urllib.request.urlopen(url)
+        except urllib.error.HTTPError as e:
+            # Email admin / log
+            print(f'HTTPError: {e.code} for {url}')
+        except urllib.error.URLError as e:
+            # Email admin / log
+            print(f'URLError: {e.code} for {url}')
+        else:
+            # Website is up
+            print(f'{url} is up')
+        time.sleep(60)
+
+if __name__ == '__main__':
+    url = 'http://www.google.com/py'
+    uptime_bot(url)
+
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+https://pypi.org/project/pynput/
+
+cat > mouse.py
+
+from pynput.mouse import Button, Controller
+import time
+
+mouse = Controller()
+while True:
+    print('The current pointer position is {0}'.format(mouse.position))
+    mouse.move(5, 10)
+    mouse.scroll(0, 2)
+    print('The current pointer position is {0}'.format(mouse.position))
+    time.sleep(55) # Sleep for 55 seconds
+
+
+if __name__ == '__main__':
+
+clear;python3.6 mouse.py
+
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+sudo apt install python3-pip
+
+python3.9 -m pip install virtualenv
+
+mkdir flasktest; cd flasktest; virtualenv venv; source venv/bin/activate
+
+cd /Volumes/work/dev/Project/flasktest; virtualenv venv; source venv/bin/activate
+
+cd my-project/
+virtualenv venv
+
+# virtualenv venv --system-site-packages  ---- to also inherit globally installed packages
+
+
+source venv/bin/activate
+deactivate
+
+python3.9 -m pip install --upgrade pip
+python3.9 -m pip install install flask
+python3.9 -m pip install install requests
+
+cat > app.py
+
+#!/bin/python3.9
+
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Hello..."
+
+
+app.run(host="0.0.0.0", port=80)  # saying run on all addresses.
+
+OR
+app.run(debug=True)
+
+
+python3.9  app.py
+
+clear;cat app.py
+
+
+-----
+
+ % cat app6.py 
+from flask import Flask, jsonify 
+
+app = Flask(__name__) 
+
+@app.route('/api') 
+def my_microservice(): 
+    return jsonify({'Hello': 'World!'}) 
+
+if __name__ == '__main__': 
+    #app.run()
+    app.run(host="0.0.0.0", port=80)
+
+
+
+------ https://medium.com/python-pandemonium/json-the-python-way-91aac95d4041
+
+dumps() — to serialize an object to a JSON formatted string.
+dump() — to serialize an object to a JSON formatted stream ( which supports writing to a file)
+
+>>> import json
+>>> json.dumps({
+        "name": "Foo Bar",
+        "age": 78,
+        "friends": ["Jane","John"],
+        "balance": 345.80,
+        "other_names":("Doe","Joe"),
+        "active":True,
+        "spouse":None
+    }, sort_keys=True, indent=4)
+
+
+>>> import json
+>>> with open('user.json','w') as file:
+         json.dump({
+            "name": "Foo Bar",
+            "age": 78,
+            "friends": ["Jane","John"],
+            "balance": 345.80,
+            "other_names":("Doe","Joe"),
+            "active":True,
+            "spouse":None
+        }, file, sort_keys=True, indent=4)
+
+>>> import json
+>>> json.loads('{ "active": true, "age": 78, "balance": 345.8,   "friends": ["Jane","John"], "name": "Foo Bar", "other_names": ["Doe","Joe"],"spouse":null}')
+
+>>> import json
+>>> with open('user.json', 'r') as file:
+        user_data = json.load(file)
+>>> print(user_data)
+
+
+---
+class User:
+    """
+    Custom User Class
+    """
+    def __init__(self,name,age,active,balance,other_names,friends,spouse):
+        self.name = name
+        self.age = age
+        self.active = active
+        self.balance = balance
+        self.other_names = other_names
+        self.friends = friends
+        self.spouse = spouse
+        
+    def __str__(self):
+        return self.name
+
+
+def convert_to_dict(obj):
+    """
+    A function takes in a custom object and returns a dictionary representation of the object.
+    This dict representation includes meta data such as the object's module and class names.
+    """
+
+    #  Populate the dictionary with object meta data 
+    obj_dict = {
+    "__class__": obj.__class__.__name__,
+    "__module__": obj.__module__
+    }
+
+    #  Populate the dictionary with object properties
+    obj_dict.update(obj.__dict__)
+
+    return obj_dict
+
+>>> from json_convert_to_dict import convert_to_dict
+>>> data = json.dumps(new_user,default=convert_to_dict,indent=4, sort_keys=True)
+>>> print(data)
+
+>>> import json
+>>> user_data = json.loads('{"__class__": "User", "__module__": "__main__", "name": "Foo Bar", "age": 78, "active": true, "balance": 345.8, "other_names": ["Doe", "Joe"], "friends": ["Jane", "John"], "spouse": null}')
+>>> type(user_data)
+>>> print(user_data)
+As expected, user_data is of type dict .
+
+
+def dict_to_obj(our_dict):
+    """
+    Function that takes in a dict and returns a custom object associated with the dict.
+    This function makes use of the "__module__" and "__class__" metadata in the dictionary
+    to know which object type to create.
+    """
+    if "__class__" in our_dict:
+        # Pop ensures we remove metadata from the dict to leave only the instance arguments
+        class_name = our_dict.pop("__class__")
+        
+        # Get the module name from the dict and import it
+        module_name = our_dict.pop("__module__")
+        
+        # We use the built in __import__ function since the module name is not yet known at runtime
+        module = __import__(module_name)
+        
+        # Get the class from the module
+        class_ = getattr(module,class_name)
+        
+        # Use dictionary unpacking to initialize the object
+        obj = class_(**our_dict)
+    else:
+        obj = our_dict
+    return obj
+
+
+>>> from json_dict_to_obj import dict_to_obj
+>>> new_object = json.loads('{"__class__": "User", "__module__": "__main__", "name": "Foo Bar", "age": 78, "active": true, "balance": 345.8, "other_names": ["Doe", "Joe"], "friends": ["Jane", "John"], "spouse": null}',object_hook=dict_to_obj)
+>>> type(new_object)
+
+https://docs.python.org/3/library/json.html
+https://medium.com/python-pandemonium/python-dictionaries-45cacc2b76aa
+
+empty_dict = {}
+
+>>> job1 = {"title":"Production Manager",
+"location":"Rest of Kenya",
+"job_type":"Full Time",
+"employer":"The African Talent Company (TATC)",
+"category":"Farming"}
+
+# Using keyword arguments
+dict(
+  title="Marketing & Business Development Manager",
+  location="Mombasa",job_type="Full Time",
+  employer="KUSCCO Limited (Kenya Union of Savings & Credit Co-operatives Limited)",
+  category="Marketing & Communications"
+)
+
+# Check existence of title
+"title" in job2 # returns True
+
+"salary" in job2 # returns False
+
+# Using key indexing
+job2["title"] # return 'Marketing & Business Development Manager'
+
+# Using get() method
+job2.get("title") # return 'Marketing & Business Development Manager'
+
+job2.get("salary") # return None
+
+# Passing a second argument to get()
+job2.get("salary", 5000) # return 5000
+
+# Adding a new entry for salary using the index
+job2["salary"] = 10000
+
+# Modifying the entry for job_type using the index
+job2["job_type"] = "Part time"
+
+# Modifying the salary entry using update
+job2.update({"salary":20000})
+
+# Adding the available entry using update
+job2.update({"available":True})
+
+
+extra_info = {
+  "verified":True,
+  "qualification":"Undergraduate Degree",
+  "taxable":True}
+
+# Merge extra_info with job2
+job2.update(extra_info)
+
+
+del job2["salary"]
+del job2["available"]
+print(job2) #return a dictionary without 'salary' and 'available' entries
+
+job1.clear()
+print(job1) #return an empty dictionary
+
+del job1
+print(job1) # return NameError
+
+
+# Iterating through the dictionary itself
+for x in job2:
+    print(x) # prints the keys of job2
+    
+# Using keys()
+for key in job2.keys():
+    print(key) # prints the keys of job2
+    
+# Using values()
+for val in job2.values():
+    print(val) # prints the values of job2
+    
+# Dictionary iteration use case
+import csv
+with open('jobs.csv','r') as csv_file:
+    reader = csv.DictReader(csv_file)
+    for job in reader:
+        
+        # Using items()
+        for key,val in job.items():
+            # Apply any additional processing
+            print(key, val) #print the keys and values of each job
+
+
+-- sorting
+with open('jobs.csv','r') as csv_file:
+    reader = csv.DictReader(csv_file)
+    for job in reader:
+        
+        # Using sorted() to sort a dictionary's items on the keys
+        for key,val in sorted(job.items(),key=lambda item:item[0]):
+        
+            # Apply any additional processing
+            print(key, val) #print the keys and values of each job
+
+
+-- searching
+# How not to search for a value and return it
+key_i_need = "location"
+target = ""
+for key in job2:
+    if key == key_i_need:
+        target = job2[key]
+        
+# How to search efficiently
+target = job2.get("location")
+
+
+
+
+
+#Define a Job Class -- make it better
+class Job:
+    def __init__(self,
+                 title="Job Title",
+                 location="Job Location",
+                 job_type="Job Type",
+                 employer="Job Employer",
+                 category="Job Category",):       
+        self.title = title
+        self.location = location
+        self.job_type = job_type
+        self.employer = employer
+        self.category = category
+    def __str__(self):
+        return self.title
+
+# Creating a job object without unpacking
+Job("Marketing & Business Development Manager","Mombasa","Full Time",
+    "KUSCCO Limited (Kenya Union of Savings & Credit Co-operatives Limited)",
+    "Marketing & Communications")
+
+with open('jobs.csv','r') as csv_file:
+    reader = csv.DictReader(csv_file)
+    for job in reader:
+        
+        # Creating a job object with unpacking
+        Job(**job)
+
+
+---
+Dictionary operations are heavily optimized in python, especially since they’re also extensively used within the language. 
+For instance, members of a class are internally stored in dictionaries.
+Most dictionary operations have a time complexity of O(1) — implying that the operations run in constant time relative to the size of the dictionary. This simply means that the operation only runs once irregardless of the dictionary size. 
+Creating a dictionary runs in a linear time of O(N), where “N” is the number of key-value pairs. 
+Similarly, all iterations run in O(N) since the loop has to run N times.
+
+Dictionary Operations — https://www.ics.uci.edu/~brgallar/week8_2.html
+
+
+---
+# Create virtual environment with Python 3.6.5
+mkvirtualenv --python="PATH/TO/PYTHON3.6.5/python.exe" python-add-gui
+
+
+
+
+
+
+https://www.stavros.io/posts/python-fuse-filesystem/
+
+https://github.com/skorokithakis/python-fuse-sample
+
+
+
+
+
+
+
+------
+
+def generate_unique_code(self, deal, user):
+        """
+        Generates Tickets for virtual deals
+
+        Arguments:
+            deal -- object representing the deal being purchased
+            user -- object representing customer
+
+        Returns:
+            filename -- name of the file where QR code is stored
+            id       -- unique ID generated for this transaction
+        """
+        # Converts utf8 to ascii strings because that is what UUID works with
+        merchant_name = deal.advertiser.name.encode("utf8")
+        deal_name = deal.advertiser.name.encode("utf8")
+        username = user.username.encode("utf8")
+
+        # Generates a unique code with python's UUID library
+        # and embed in qrcode
+        ticket_id = uuid.uuid5(
+            uuid.NAMESPACE_DNS, merchant_name + deal_name + username
+        )
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=4,
+        )
+        qr.add_data(ticket_id)
+        qr.make(fit=True)
+
+        img = qr.make_image()
+        output = StringIO.StringIO()
+        img.save(output, 'PNG')
+        img = output.getvalue().encode("base64")
+        output.close()
+        return img, ticket_id 
