@@ -1,0 +1,529 @@
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
+https://flask.palletsprojects.com/en/2.2.x/
+
+https://marshmallow.readthedocs.io/en/stable/
+
+https://flask-cors.readthedocs.io/en/latest/
+
+https://flask.palletsprojects.com/en/1.1.x/views/#method-based-dispatching
+
+https://pypi.org/
+
+
+Documentation: https://flask.palletsprojects.com/
+
+Changes: https://flask.palletsprojects.com/changes/
+
+PyPI Releases: https://pypi.org/project/Flask/
+
+Source Code: https://github.com/pallets/flask/
+
+Issue Tracker: https://github.com/pallets/flask/issues/
+
+Website: https://palletsprojects.com/p/flask/
+
+Twitter: https://twitter.com/PalletsTeam
+
+Chat: https://discord.gg/pallets
+
+
+
+# clone the repository
+$ git clone https://github.com/pallets/flask
+$ cd flask
+# checkout the correct version
+$ git tag  # shows the tagged versions
+$ git checkout latest-tag-found-above
+$ cd examples/tutorial
+Create a virtualenv and activate it:
+
+$ python3 -m venv venv
+$ . venv/bin/activate
+Or on Windows cmd:
+
+$ py -3 -m venv venv
+$ venv\Scripts\activate.bat
+
+$ flask --app flaskr init-db
+$ flask --app flaskr --debug run
+
+
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+import click
+
+@click.command()
+@click.option("--count", default=1, help="Number of greetings.")
+@click.option("--name", prompt="Your name",
+              help="The person to greet.")
+def hello(count, name):
+    """Simple program that greets NAME for a total of COUNT times."""
+    for _ in range(count):
+        click.echo("Hello, %s!" % name)
+
+if __name__ == '__main__':
+    hello()
+
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+from itsdangerous import URLSafeSerializer
+auth_s = URLSafeSerializer("secret key", "auth")
+token = auth_s.dumps({"id": 5, "name": "itsdangerous"})
+
+print(token)
+# eyJpZCI6NSwibmFtZSI6Iml0c2Rhbmdlcm91cyJ9.6YP6T0BaO67XP--9UzTrmurXSmg
+
+data = auth_s.loads(token)
+print(data["name"])
+# itsdangerous
+
+
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
+
+# save this as app.py
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route("/")
+def hello():
+    return "Hello, World!"
+
+
+
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
+
+
+$ virtualenv -p python3.9 venvTest
+
+$ cd ../Documents/Personal/FlaskProject/src/Flask-Api/
+
+$ source ~/pythonEnvs/venvTest/bin/activate
+
+(venvTest) $ pip --version
+pip 21.1.1 from /Users/testuser/pythonEnvs/venvTest/lib/python3.9/site-packages/pip (python 3.9)
+
+(venvTest) $ python --version
+Python 3.9.5
+
+(venvTest) $ pip install flask
+
+(venvTest) $ pip install Flask-RESTful
+
+(venvTest) $ pip install Flask-JWT
+
+(venvTest) $ python3.9 app.py 
+
+Traceback (most recent call last):
+  File "/Users/testuser/Documents/githubProjects/FlaskProject/src/Flask-Api/app.py", line 2, in <module>
+    from flask_restful import Api
+  File "/Users/testuser/pythonEnvs/venvTest/lib/python3.9/site-packages/flask_restful/__init__.py", line 14, in <module>
+    from flask.helpers import _endpoint_from_view_func
+ImportError: cannot import name '_endpoint_from_view_func' from 'flask.helpers' (/Users/testuser/pythonEnvs/venvTest/lib/python3.9/site-packages/flask/helpers.py)
+
+
+old requirements.txt
+# Pip Freeze from an older version
+
+aniso8601==9.0.1
+click==7.1.2
+Flask==1.1.2
+Flask-JWT==0.3.2
+Flask-RESTful==0.3.8
+itsdangerous==1.1.0
+Jinja2==2.11.3
+MarkupSafe==1.1.1
+PyJWT==1.4.2
+pytz==2021.1
+six==1.16.0
+
+New requirements.txt
+
+aniso8601==9.0.1
+click==8.0.0
+Flask==2.0.0
+Flask-JWT==0.3.2
+Flask-RESTful==0.3.8
+itsdangerous==2.0.0
+Jinja2==3.0.0
+MarkupSafe==2.0.0
+PyJWT==1.4.2
+pytz==2021.1
+six==1.16.0
+Werkzeug==2.0.0
+
+from flask import Flask
+from flask_restful import Api
+from flask_jwt import JWT
+from security import authenticate, identity
+from resources.user import UserRegister
+from resources.item import Item, ItemList
+
+
+# Resources are something our API is concerned with ( let it be students, items etc)
+app = Flask(__name__)
+app.secret_key = 'flask_application'
+api = Api(app)
+
+jwt = JWT(app, authenticate, identity) # JWT creates a new endpoint /auth
+
+api.add_resource(Item, '/item/<string:name>')
+api.add_resource(ItemList, '/items')
+api.add_resource(UserRegister, '/register')
+
+if __name__ == "__main__":
+    app.run(port=5000, debug = True) # To debug use (debug = True)
+
+
+
+---
+There is no new release on PyPI yet.
+
+You could either install Flask-Restful via GitHub or wait some time for a new release 
+    and meanwhile use your older pinned versions.
+    
+    
+https://github.com/flask-restful/flask-restful/commit/fc9b34c39472284a57c50d94fec5b51fe8d71e14
+https://pypi.org/project/Flask-RESTful/#history
+
+Recommended alternatives to Flask-RESTful components
+https://github.com/flask-restful/flask-restful/issues/883 
+
+
+setup.py
+#!/usr/bin/env python
+
+import re
+import sys
+from os import path
+from setuptools import setup, find_packages
+
+
+requirements = [
+    'aniso8601>=0.82',
+    'Flask>=0.8',
+    'six>=1.3.0',
+    'pytz',
+]
+
+
+version_file = path.join(
+    path.dirname(__file__),
+    'flask_restful',
+    '__version__.py'
+)
+with open(version_file, 'r') as fp:
+    m = re.search(
+        r"^__version__ = ['\"]([^'\"]*)['\"]",
+        fp.read(),
+        re.M
+    )
+    version = m.groups(1)[0]
+
+
+setup(
+    name='Flask-RESTful',
+    version=version,
+    license='BSD',
+    url='https://www.github.com/flask-restful/flask-restful/',
+    project_urls={
+        'Source': 'https://github.com/flask-restful/flask-restful',
+    },
+    author='Twilio API Team',
+    author_email='help@twilio.com',
+    description='Simple framework for creating REST APIs',
+    packages=find_packages(exclude=['tests']),
+    classifiers=[
+        'Framework :: Flask',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'License :: OSI Approved :: BSD License',
+    ],
+    zip_safe=False,
+    include_package_data=True,
+    platforms='any',
+    test_suite = 'nose.collector',
+    install_requires=requirements,
+    tests_require=['Flask-RESTful', 'mock>=0.8', 'blinker'],
+    # Install these with "pip install -e '.[docs]'
+    extras_require={
+        'docs': 'sphinx',
+    }
+)
+
+
+
+
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
+
+https://flask-marshmallow.readthedocs.io/en/latest/
+
+pip install flask-marshmallow
+Create your app.
+
+from flask import Flask
+from flask_marshmallow import Marshmallow
+
+app = Flask(__name__)
+ma = Marshmallow(app)
+Write your models.
+
+from your_orm import Model, Column, Integer, String, DateTime
+
+
+class User(Model):
+    email = Column(String)
+    password = Column(String)
+    date_created = Column(DateTime, auto_now_add=True)
+Define your output format with marshmallow.
+
+class UserSchema(ma.Schema):
+    class Meta:
+        # Fields to expose
+        fields = ("email", "date_created", "_links")
+
+    # Smart hyperlinking
+    _links = ma.Hyperlinks(
+        {
+            "self": ma.URLFor("user_detail", values=dict(id="<id>")),
+            "collection": ma.URLFor("users"),
+        }
+    )
+
+
+user_schema = UserSchema()
+users_schema = UserSchema(many=True)
+Output the data in your views.
+
+@app.route("/api/users/")
+def users():
+    all_users = User.all()
+    return users_schema.dump(all_users)
+
+
+@app.route("/api/users/<id>")
+def user_detail(id):
+    user = User.get(id)
+    return user_schema.dump(user)
+
+
+# {
+#     "email": "fred@queen.com",
+#     "date_created": "Fri, 25 Apr 2014 06:02:56 -0000",
+#     "_links": {
+#         "self": "/api/users/42",
+#         "collection": "/api/users/"
+#     }
+# }
+
+
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
+# pip install -U flask-sqlalchemy marshmallow-sqlalchemy
+#  Next, initialize the SQLAlchemy and Marshmallow extensions, in that order.
+
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from flask_marshmallow import Marshmallow
+
+app = Flask(__name__)
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:////tmp/test.db"
+
+# Order matters: Initialize SQLAlchemy before Marshmallow
+db = SQLAlchemy(app)
+ma = Marshmallow(app)
+# Note on initialization order
+# Flask-SQLAlchemy must be initialized before Flask-Marshmallow.
+
+Declare your models like normal.
+
+class Author(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255))
+
+
+class Book(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(255))
+    author_id = db.Column(db.Integer, db.ForeignKey("author.id"))
+    author = db.relationship("Author", backref="books")
+
+# Generate marshmallow Schemas from your models using SQLAlchemySchema or SQLAlchemyAutoSchema.
+
+class AuthorSchema(ma.SQLAlchemySchema):
+    class Meta:
+        model = Author
+
+    id = ma.auto_field()
+    name = ma.auto_field()
+    books = ma.auto_field()
+
+
+class BookSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Book
+        include_fk = True
+
+# You can now use your schema to dump and load your ORM objects.
+
+db.create_all()
+author_schema = AuthorSchema()
+book_schema = BookSchema()
+author = Author(name="Chuck Paluhniuk")
+book = Book(title="Fight Club", author=author)
+db.session.add(author)
+db.session.add(book)
+db.session.commit()
+author_schema.dump(author)
+
+# {'id': 1, 'name': 'Chuck Paluhniuk', 'books': [1]}
+
+
+
+OR  
+
+
+from datetime import date
+from pprint import pprint
+
+from marshmallow import Schema, fields
+
+
+class ArtistSchema(Schema):
+    name = fields.Str()
+
+
+class AlbumSchema(Schema):
+    title = fields.Str()
+    release_date = fields.Date()
+    artist = fields.Nested(ArtistSchema())
+
+
+bowie = dict(name="David Bowie")
+album = dict(artist=bowie, title="Hunky Dory", release_date=date(1971, 12, 17))
+
+schema = AlbumSchema()
+result = schema.dump(album)
+pprint(result, indent=2)
+# { 'artist': {'name': 'David Bowie'},
+#   'release_date': '1971-12-17',
+#   'title': 'Hunky Dory'}
+
+
+ref. https://github.com/marshmallow-code/marshmallow/stargazers
+	https://marshmallow.readthedocs.io/en/stable/why.html
+
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
+"""
+SQLAlchemySchema is nearly identical in API to marshmallow_sqlalchemy.SQLAlchemySchema with the following exceptions:
+
+By default, SQLAlchemySchema uses the scoped session created by Flask-SQLAlchemy.
+
+SQLAlchemySchema subclasses flask_marshmallow.Schema, so it includes the jsonify method.
+
+Note: By default, Flask’s jsonify method sorts the list of keys 
+   and returns consistent results to ensure that external HTTP caches aren’t trashed. As a side effect, 
+   this will override ordered=True in the SQLAlchemySchema’s class Meta (if you set it). To disable this, 
+   set JSON_SORT_KEYS=False in your Flask app config. In production it’s recommended to let jsonify sort the keys 
+   and not set ordered=True in your SQLAlchemySchema in order to minimize generation time 
+   and maximize cacheability of the results.
+
+You can also use ma.HyperlinkRelated fields if you want relationships to be represented by hyperlinks rather than primary keys.
+"""
+
+class BookSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Book
+
+    author = ma.HyperlinkRelated("author_detail")
+
+
+with app.test_request_context():
+    print(book_schema.dump(book))
+# {'id': 1, 'title': 'Fight Club', 'author': '/authors/1'}
+
+
+"""
+The first argument to the HyperlinkRelated constructor is the name of the view used to generate the URL, 
+just as you would pass it to the url_for function. If your models and views use the id attribute as a primary key,
+ you’re done; otherwise, you must specify the name of the attribute used as the primary key.
+
+To represent a one-to-many relationship, wrap the HyperlinkRelated instance in a marshmallow.fields.List field, like this:
+
+"""
+
+class AuthorSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Author
+
+    books = ma.List(ma.HyperlinkRelated("book_detail"))
+
+
+
+with app.test_request_context():
+    print(author_schema.dump(author))
+# {'id': 1, 'name': 'Chuck Paluhniuk', 'books': ['/books/1']}
+
+
+
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+# A Flask extension for handling Cross Origin Resource Sharing (CORS), making cross-origin AJAX possible.
+# logging.getLogger('flask_cors').level = logging.DEBUG
+
+# https://flask-cors.corydolphin.com/en/latest/api.html
+
+$ pip install -U flask-cors
+
+# Simple usage
+
+from flask import Flask
+from flask_cors import CORS
+
+app = Flask(__name__)
+CORS(app)
+
+@app.route("/")
+def helloWorld():
+  return "Hello, cross-origin-world!"
+
+OR
+
+app = Flask(__name__)
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+
+@app.route("/api/v1/users")
+def list_users():
+  return "user example"
+
+
+
+
+
+
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
